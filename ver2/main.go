@@ -9,15 +9,17 @@ import (
 	"time"
 	"ver2/models"
 
+	"gitlab.com/avarf/getenvs"
+
 	"github.com/Pallinder/go-randomdata"
 )
 
 // user annab id edasi teisele töörühmale ja teeb ise uue kasutaja. Teine töögrupp teeb kaarte
 func main() {
-	apiUrl := "http://localhost:8080/user"
-	userCount := 10000   // Total number of users to create
-	workerCount := 3     // Number of worker goroutines for user creation
-	cardWorkerCount := 6 // Number of worker goroutines for card creation
+	apiEp := getenvs.GetEnvString("APIURL", "http://localhost:8080")
+	userCount, _ := getenvs.GetEnvInt("USERCOUNT", 10000)         // Total number of users to create( user = 1 user ja 3 kaarti)
+	workerCount, _ := getenvs.GetEnvInt("WORKERCOUNT", 3)         // Number of worker goroutines
+	cardWorkerCount, _ := getenvs.GetEnvInt("CARDWORKERCOUNT", 6) // Number of worker goroutines
 
 	var wg sync.WaitGroup
 	userChannel := make(chan int, userCount)
@@ -27,13 +29,13 @@ func main() {
 
 	for i := 0; i < workerCount; i++ {
 		wg.Add(1)
-		go userCreationWorker(apiUrl, userChannel, cardChannel, &wg)
+		go userCreationWorker(apiEp, userChannel, cardChannel, &wg)
 	}
 
 	var cardWg sync.WaitGroup
 	for i := 0; i < cardWorkerCount; i++ {
 		cardWg.Add(1)
-		go cardCreationWorker(cardChannel, &cardWg)
+		go cardCreationWorker(apiEp, cardChannel, &cardWg)
 	}
 
 	for i := 0; i < userCount; i++ {
@@ -54,7 +56,8 @@ func main() {
 	fmt.Printf("\nFinished in %02d:%02d:%02d\n", elapsedHours, elapsedMinutes, elapsedSeconds)
 }
 
-func userCreationWorker(apiUrl string, userChannel <-chan int, cardChannel chan<- int, wg *sync.WaitGroup) {
+func userCreationWorker(apiEp string, userChannel <-chan int, cardChannel chan<- int, wg *sync.WaitGroup) {
+	apiUrl := fmt.Sprintf("%s/user", apiEp)
 	defer wg.Done()
 
 	for userCount := range userChannel {
@@ -93,11 +96,11 @@ func userCreationWorker(apiUrl string, userChannel <-chan int, cardChannel chan<
 	}
 }
 
-func cardCreationWorker(cardChannel <-chan int, wg *sync.WaitGroup) {
+func cardCreationWorker(apiEp string, cardChannel <-chan int, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for userID := range cardChannel {
-		apiUrl := fmt.Sprintf("http://localhost:8080/card/%d", userID)
+		apiUrl := fmt.Sprintf("%s/card/%d", apiEp, userID)
 
 		for i := 0; i < 3; i++ {
 			resp, err := http.Post(apiUrl, "", nil)

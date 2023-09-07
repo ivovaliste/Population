@@ -5,8 +5,8 @@ metadata:
   labels:
     app: 1workgroup
 spec:
-  completions: 8
-  parallelism: 8
+  completions: 4
+  parallelism: 4
   manualSelector: true
   selector:
     matchLabels:
@@ -21,7 +21,7 @@ spec:
         - name: regcred
       containers:
         - name: 1workgroup
-          image: artifactory.cooppank.eu/docker-snapshot/1workgroup:0.1.1
+          image: artifactory.cooppank.eu/docker-snapshot/nworkgroup:0.1.0
           # command:
           #   - "sh"
           #   - "-c"
@@ -30,9 +30,11 @@ spec:
             - name: APIURL
               value: "http://usersgen:8080"
             - name: USERCOUNT
-              value: "1250"
+              value: "2500"
             - name: WORKERCOUNT
-              value: "4"
+              value: "3"
+            - name: CARDWORKERCOUNT
+              value: "6"
           resources:
             requests:
               memory: "256Mi"

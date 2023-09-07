@@ -1,0 +1,10 @@
+usercount,workercount,parallelism,completions,cpulimits,memlimitstime,comment
+10000,1,1,1,500m,512Mi,6:11,
+10000,4,1,1,500m,512Mi,1:43,
+10000,4,1,1,2,512Mi,1:43,
+10000,1,4,8,2,512Mi,,completions tuleb ümber vaadata.
+2500,1,4,1,2,512Mi,1:40,
+2500,1,4,4,2,512Mi,1:48,
+2500,4,4,4,2,512Mi,0:50,
+1250,8,8,8,2,512Mi,0:31,
+1250,8,8,8,1,512Mi,0:38,

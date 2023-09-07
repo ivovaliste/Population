@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: 1workgroup
+  labels:
+    app: 1workgroup
+spec:
+  completions: 8
+  parallelism: 8
+  manualSelector: true
+  selector:
+    matchLabels:
+      app: 1workgroup
+  template:
+    metadata:
+      labels:
+        app: 1workgroup
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: regcred
+      containers:
+        - name: 1workgroup
+          image: artifactory.cooppank.eu/docker-snapshot/1workgroup:0.1.1
+          # command:
+          #   - "sh"
+          #   - "-c"
+          #   - "tail -f /dev/null"
+          env:
+            - name: APIURL
+              value: "http://usersgen:8080"
+            - name: USERCOUNT
+              value: "1250"
+            - name: WORKERCOUNT
+              value: "8"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "500m"
+            limits:
+              memory: "512Mi"
+              cpu: "1"

@@ -9,14 +9,16 @@ import (
 	"time"
 	"ver1/models"
 
+	"gitlab.com/avarf/getenvs"
+
 	"github.com/Pallinder/go-randomdata"
 )
 
 // üks töögrupp kõik teevad sama asja. loob kasutaja saab id ja teeb 3 kaarti
 func main() {
-	apiUrl := "http://localhost:8080/user"
-	userCount := 10000 // Total number of users to create( user = 1 user ja 3 kaarti)
-	workerCount := 4   // Number of worker goroutines
+	apiEp := getenvs.GetEnvString("APIURL", "http://localhost:8080")
+	userCount, _ := getenvs.GetEnvInt("USERCOUNT", 10000) // Total number of users to create( user = 1 user ja 3 kaarti)
+	workerCount, _ := getenvs.GetEnvInt("WORKERCOUNT", 4) // Number of worker goroutines
 
 	var wg sync.WaitGroup
 	userChannel := make(chan int)
@@ -24,7 +26,7 @@ func main() {
 
 	for i := 0; i < workerCount; i++ {
 		wg.Add(1)
-		go worker(apiUrl, userChannel, &wg)
+		go worker(apiEp, userChannel, &wg)
 	}
 
 	for i := 0; i < userCount; i++ {
@@ -42,7 +44,8 @@ func main() {
 	fmt.Printf("\nFinished in %02d:%02d:%02d\n", elapsedHours, elapsedMinutes, elapsedSeconds)
 }
 
-func worker(apiUrl string, userChannel <-chan int, wg *sync.WaitGroup) {
+func worker(apiEp string, userChannel <-chan int, wg *sync.WaitGroup) {
+	apiUrl := fmt.Sprintf("%s/user", apiEp)
 	defer wg.Done()
 
 	for userCount := range userChannel {
@@ -75,7 +78,7 @@ func worker(apiUrl string, userChannel <-chan int, wg *sync.WaitGroup) {
 				return
 			}
 			userID := extractUserID(message)
-			makeAddCardRequests(userID)
+			makeAddCardRequests(apiEp, userID)
 			fmt.Printf("User #%d created successfully with ID: %d\n", userCount+1, userID)
 		}
 	}
@@ -99,8 +102,8 @@ func extractUserID(message string) int {
 	return userID
 }
 
-func makeAddCardRequests(userID int) {
-	apiUrl := fmt.Sprintf("http://localhost:8080/card/%d", userID)
+func makeAddCardRequests(apiEp string, userID int) {
+	apiUrl := fmt.Sprintf("%s/card/%d", apiEp, userID)
 
 	for i := 0; i < 3; i++ {
 		resp, err := http.Post(apiUrl, "", nil) // No request body needed

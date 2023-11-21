@@ -50,6 +50,7 @@ func main() {
 
 	elapsedTime := time.Since(startTime)
 	elapsedHours := int(elapsedTime.Hours())
+
 	elapsedMinutes := int(elapsedTime.Minutes()) % 60
 	elapsedSeconds := int(elapsedTime.Seconds()) % 60
 

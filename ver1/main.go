@@ -44,6 +44,7 @@ func (up *UserPopulation) Start() {
 	}
 
 	close(up.UserChannel)
+
 	up.WaitGroup.Wait()
 
 	elapsedTime := time.Since(up.StartTime)
